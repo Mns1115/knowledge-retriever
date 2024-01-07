@@ -18,11 +18,27 @@ import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded';
 import GoogleIcon from './GoogleIcon';
 import logo from './ALT+AI_logo.png'
+import { useEffect, useState } from "react";
+import axios, { AxiosResponse } from "axios";
+import { GoogleLogin } from '@react-oauth/google';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate, useNavigate
+} from 'react-router-dom';
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 // import { Switch, Route } from "react-router-dom";
 import GoogleAuth from "./GoogleAuth";
 
+
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  avatar: string;
+}
 
 interface FormElements extends HTMLFormControlsCollection {
   email: HTMLInputElement;
@@ -66,6 +82,39 @@ function ColorSchemeToggle(props: IconButtonProps) {
 }
 
 export default function JoySignInSideTemplate() {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  const [username, setUsername] = useState(localStorage.getItem('goggleFirstName'))
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("user_goggle");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
+  const openGoogleLoginPage = () => {
+    const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+
+    const scope = [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile",
+    ].join(" ");
+
+    const params = new URLSearchParams({
+      response_type: "code",
+      client_id: "478510628923-e1l9dtk9g81f1cmagri7ln2go1litcvo.apps.googleusercontent.com",
+      redirect_uri: `http://localhost:3000/`,
+      prompt: "select_account",
+      access_type: "offline",
+      scope,
+    });
+
+    const url = `${googleAuthUrl}?${params}`;
+
+    window.location.href = url;
+  };
+
+
   return (
     <CssVarsProvider defaultMode="dark" disableTransitionOnChange>
       <CssBaseline />
@@ -155,13 +204,15 @@ export default function JoySignInSideTemplate() {
                   New to company?{' '}
                 </Typography>
               </Stack>
-              <GoogleOAuthProvider clientId="478510628923-e1l9dtk9g81f1cmagri7ln2go1litcvo.apps.googleusercontent.com"
+              <Button
+                variant="soft"
+                color="neutral"
+                fullWidth
+                startDecorator={<GoogleIcon />}
+                onClick={openGoogleLoginPage}
               >
-                <React.StrictMode>
-                  <GoogleAuth />
-                  
-                </React.StrictMode>
-              </GoogleOAuthProvider>
+                Continue with Google
+              </Button>
 
             </Stack>
             <Divider

@@ -35,10 +35,10 @@ import logo from '../ALT+AI_logo.png'
 
 import SvgIcon from '@mui/joy/SvgIcon';
 import { styled } from '@mui/joy';
-
+import { useCallback, useEffect, useState } from "react";
 import ColorSchemeToggle from './ColorSchemeToggle';
 import { closeSidebar } from '../utils';
-import {Navigate,useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 
 
@@ -85,6 +85,22 @@ function Toggler(props: {
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState(localStorage.getItem('goggleFirstName'))
+  const [email, setEmail] = useState(localStorage.getItem('goggleEmail'))
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("goggleFirstName");
+    const storedEmail = localStorage.getItem("goggleEmail");
+    if (storedUsername) {
+      setUsername(storedUsername);
+      setEmail(storedEmail)
+    }
+  }, []);
+
+
+  const handleLogout = () => {
+    localStorage.clear(); // Clear localStorage when the button is clicked
+    navigate('/auth')
+  };
   return (
     <Sheet
       className="Sidebar"
@@ -166,12 +182,12 @@ export default function Sidebar() {
         >
           <ListItem>
             <ListItemButton selected>
-            <AddIcon></AddIcon>
+              <AddIcon></AddIcon>
               <ListItemContent>
                 <Typography level="title-sm">New Conversation</Typography>
               </ListItemContent>
             </ListItemButton>
-          </ListItem> 
+          </ListItem>
           <ListItem>
             <ListItemButton>
               <HomeRoundedIcon />
@@ -289,11 +305,11 @@ export default function Sidebar() {
           src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=286"
         />
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography level="title-sm">Testing</Typography>
-          <Typography level="body-xs">test@test.com</Typography>
+          <Typography level="title-sm">{username}</Typography>
+          <Typography level="body-xs">{email}</Typography>
         </Box>
         <IconButton size="sm" variant="plain" color="neutral">
-          <LogoutRoundedIcon onClick={() => navigate('/auth')}/>
+          <LogoutRoundedIcon onClick={handleLogout} />
         </IconButton>
       </Box>
     </Sheet>
