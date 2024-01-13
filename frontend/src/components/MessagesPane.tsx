@@ -8,6 +8,10 @@ import MessageInput from './MessageInput';
 import MessagesPaneHeader from './MessagesPaneHeader';
 import { ChatProps, MessageProps } from '../types';
 
+
+import Button from '@mui/joy/Button';
+import Snackbar, { SnackbarOrigin } from '@mui/joy/Snackbar';
+import Alert from '@mui/joy/Alert';
 type MessagesPaneProps = {
   chat: ChatProps;
 };
@@ -21,6 +25,23 @@ export default function MessagesPane(props: MessagesPaneProps) {
     setChatMessages(chat.messages);
   }, [chat.messages]);
 
+  interface State extends SnackbarOrigin {
+    open: boolean;
+  }
+  const [state, setState] = React.useState<State>({
+    open: false,
+    vertical: 'top',
+    horizontal: 'right',
+  });
+  const { vertical, horizontal, open } = state;
+
+  const handleClick = (newState: SnackbarOrigin) => () => {
+    setState({ ...newState, open: true });
+  };
+
+  const handleClose = () => {
+    setState({ ...state, open: false });
+  };
   return (
     <Sheet
       sx={{
@@ -30,7 +51,16 @@ export default function MessagesPane(props: MessagesPaneProps) {
         backgroundColor: 'background.level1',
       }}
     >
+      <Snackbar
+          open={open}
+          onClose={handleClose}
+          key='top+center'
+        >
+          I love snacks
+        </Snackbar>
+
       <MessagesPaneHeader sender={chat.sender} />
+        
       <Box
         sx={{
           display: 'flex',
@@ -68,6 +98,9 @@ export default function MessagesPane(props: MessagesPaneProps) {
         textAreaValue={textAreaValue}
         setTextAreaValue={setTextAreaValue}
         onSubmit={() => {
+          // setState({vertical: 'top', horizontal: 'right', open: true });
+          // uncomment for snacktime
+          console.log("Snack time")
           const newId = chatMessages.length + 1;
           const newIdString = newId.toString();
           setChatMessages([

@@ -5,11 +5,25 @@ from rest_framework.views import APIView
 from django.conf import settings
 from django.shortcuts import redirect
 from rest_framework.response import Response
-from .mixins import PublicApiMixin, ApiErrorsMixin
+from .mixins import PublicApiMixin, ApiErrorsMixin,ApiAuthMixin
 from .utils import google_get_access_token, google_get_user_info, generate_tokens_for_user
 from .models import User
 from rest_framework import status
 from .serializers import UserSerializer
+import jwt
+class Dummy( ApiErrorsMixin, APIView):
+    def post(self, request, *args, **kwargs):
+        
+        access= (request.headers['Authorization'].split(' '))[1]
+        print("Entered dummy post request\n")
+        print(access)
+        # user= google_get_user_info(access_token=access)
+        decoded = jwt.decode(access,algorithms=['HS256'], options={"verify_signature": False}) # works in PyJWT >= v2.0
+        print (decoded)
+        print (decoded["user_id"])
+        details= User.objects.get(id=int(decoded["user_id"]))
+        print(details)
+        return Response(request.POST, status=status.HTTP_200_OK)
 
 
 class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
@@ -46,7 +60,8 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             response_data = {
                 'user': UserSerializer(user).data,
                 'access_token': str(access_token),
-                'refresh_token': str(refresh_token)
+                'refresh_token': str(refresh_token),
+                'profile':str(user_data['picture'])
             }
             return Response(response_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:

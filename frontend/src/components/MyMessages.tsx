@@ -7,7 +7,7 @@ import { ChatProps } from '../types';
 import { chats } from '../data';
 
 export default function MyProfile() {
-  const [selectedChat, setSelectedChat] = React.useState<ChatProps>(chats[0]);
+  const [selectedChat, setSelectedChat] = React.useState<ChatProps>(chats[1]);
   return (
     <Sheet
       sx={{

@@ -40,6 +40,7 @@ SYSTEM_APPS = [
     "django.contrib.staticfiles",
     
     "corsheaders",
+    "oauth2_provider"
 ]
 
 
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -140,8 +142,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     ]
+CORS_ORIGIN_ALLOW_ALL = True
 
 BASE_FRONTEND_URL = os.environ.get('DJANGO_BASE_FRONTEND_URL', default='http://localhost:3000')
 # Google OAuth2 settings
 GOOGLE_OAUTH2_CLIENT_ID = "478510628923-e1l9dtk9g81f1cmagri7ln2go1litcvo.apps.googleusercontent.com"
 GOOGLE_OAUTH2_CLIENT_SECRET = "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"
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

@@ -29,10 +29,10 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import BrightnessAutoRoundedIcon from '@mui/icons-material/BrightnessAutoRounded';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-
+import Modal from '@mui/joy/Modal';
+import ModalClose from '@mui/joy/ModalClose';
 import AddIcon from '@mui/icons-material/AddCircle';
 import logo from '../ALT+AI_logo.png'
-
 import SvgIcon from '@mui/joy/SvgIcon';
 import { styled } from '@mui/joy';
 import { useCallback, useEffect, useState } from "react";
@@ -40,6 +40,12 @@ import ColorSchemeToggle from './ColorSchemeToggle';
 import { closeSidebar } from '../utils';
 import { Navigate, useNavigate } from 'react-router-dom';
 
+import Snackbar from '@mui/joy/Snackbar';
+import PlaylistAddCheckCircleRoundedIcon from '@mui/icons-material/PlaylistAddCheckCircleRounded';
+
+import axios from "axios";
+axios.defaults.headers.post['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
+// axios.defaults.headers.post['Content-Type'] = "multipart/form-data";
 
 
 const VisuallyHiddenInput = styled('input')`
@@ -82,21 +88,66 @@ function Toggler(props: {
     </React.Fragment>
   );
 }
-
 export default function Sidebar() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState(localStorage.getItem('goggleFirstName'))
-  const [email, setEmail] = useState(localStorage.getItem('goggleEmail'))
+  const [file, setFile] = useState<File>();
+  const [open, setOpen] = React.useState<boolean>(false);
+  const[errmsg ,setError]= useState('')
+  const [open1, setOpen1] = React.useState(false);
+  const [username, setUsername] = useState(localStorage.getItem('googleFirstName'))
+  const [email, setEmail] = useState(localStorage.getItem('googleEmail'))
+  const [profile, setProfile] = useState(localStorage.getItem('profile'))
   useEffect(() => {
-    const storedUsername = localStorage.getItem("goggleFirstName");
-    const storedEmail = localStorage.getItem("goggleEmail");
+    const storedUsername = localStorage.getItem("googleFirstName");
+    const storedEmail = localStorage.getItem("googleEmail");
+    const storedProfile = localStorage.getItem("profile");
     if (storedUsername) {
       setUsername(storedUsername);
       setEmail(storedEmail)
+      setProfile(storedProfile)
     }
   }, []);
 
 
+
+
+  const handleDummy = async () => {
+    const response = await axios.post("http://127.0.0.1:8000/api/dummy", {
+
+    });
+
+    console.log(response);
+  };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
+  const handleUpload = async () => {
+
+    const formData = new FormData();
+    formData.append("file", file!);
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+    };
+    const response = await axios.post("http://127.0.0.1:8000/api/newsession",
+      formData,
+      { headers });
+
+    console.log(response);
+    if (response.status == 201) {
+      localStorage.setItem('sessionid', response.data['sessionid'])
+      setOpen(false);
+      setError('Your file was uploaded successfully.')
+      setOpen1(true)
+      
+    }
+    else {
+      console.log("Error uploading");
+      setError('Error uploading your file')
+    }
+  };
   const handleLogout = () => {
     localStorage.clear(); // Clear localStorage when the button is clicked
     navigate('/auth')
@@ -124,6 +175,7 @@ export default function Sidebar() {
         borderColor: 'divider',
       }}
     >
+
       <GlobalStyles
         styles={(theme) => ({
           ':root': {
@@ -189,10 +241,10 @@ export default function Sidebar() {
             </ListItemButton>
           </ListItem>
           <ListItem>
-            <ListItemButton>
+            <ListItemButton onClick={handleDummy}>
               <HomeRoundedIcon />
               <ListItemContent>
-                <Typography level="title-sm">Home</Typography>
+                <Typography level="title-sm" >Home</Typography>
               </ListItemContent>
             </ListItemButton>
           </ListItem>
@@ -215,13 +267,13 @@ export default function Sidebar() {
                   <ListItemButton
                     role="menuitem"
                     component="a"
-                    href="/joy-ui/getting-started/templates/profile-dashboard/"
                   >
+
                     History 1
                   </ListItemButton>
                 </ListItem>
                 <ListItem>
-                  <ListItemButton>History 2</ListItemButton>
+                  <ListItemButton >History 2</ListItemButton>
                 </ListItem>
                 <ListItem>
                   <ListItemButton>History 3</ListItemButton>
@@ -260,10 +312,93 @@ export default function Sidebar() {
                 </svg>
               </SvgIcon>
             }
-          >
+            onClick={() => setOpen(true)} >
             Upload a file
-            <VisuallyHiddenInput type="file" />
+            {/* <VisuallyHiddenInput type="file" /> */}
           </Button>
+          {/* <Button onClick={handleUpload}>Upload button</Button> */}
+          <Snackbar
+            variant="soft"
+            color="success"
+            open={open1}
+            onClose={() => setOpen1(false)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            startDecorator={<PlaylistAddCheckCircleRoundedIcon />}
+            endDecorator={
+              <Button
+                onClick={() => setOpen1(false)}
+                size="sm"
+                variant="soft"
+                color="success"
+              >
+                Dismiss
+              </Button>
+            }
+          >
+            {errmsg}
+          </Snackbar>
+          <Modal
+            aria-labelledby="modal-title"
+            aria-describedby="modal-desc"
+            open={open}
+            onClose={() => setOpen(false)}
+            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+          >
+            <Sheet
+              variant="outlined"
+              sx={{
+                maxWidth: 500,
+                borderRadius: 'md',
+                p: 3,
+                boxShadow: 'lg',
+              }}
+            >
+              <ModalClose variant="plain" sx={{ m: 1 }} />
+              <Typography
+                component="h2"
+                id="modal-title"
+                level="h4"
+                textColor="inherit"
+                fontWeight="lg"
+                mb={1}
+              >
+                Upload File
+              </Typography>
+              <Button
+                component="label"
+                role={undefined}
+                tabIndex={-1}
+                variant="outlined"
+                color="neutral"
+                startDecorator={
+                  <SvgIcon>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
+                      />
+                    </svg>
+                  </SvgIcon>
+                }
+                onClick={() => setOpen(true)} >
+                Upload a file
+                <VisuallyHiddenInput type="file" onChange={handleFile} />
+
+              </Button>
+              <Typography>
+                File name: {file?.name}
+              </Typography>
+              <Button onClick={handleUpload}>Upload button</Button>
+            </Sheet>
+          </Modal>
+
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography level="title-sm">Used space</Typography>
             {/* <IconButton size="sm">
@@ -302,7 +437,7 @@ export default function Sidebar() {
         <Avatar
           variant="outlined"
           size="sm"
-          src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=286"
+          src={`${profile}`}
         />
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography level="title-sm">{username}</Typography>
