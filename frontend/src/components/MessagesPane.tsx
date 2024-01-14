@@ -7,11 +7,15 @@ import ChatBubble from './ChatBubble';
 import MessageInput from './MessageInput';
 import MessagesPaneHeader from './MessagesPaneHeader';
 import { ChatProps, MessageProps } from '../types';
-
+import { users } from '../data';
 
 import Button from '@mui/joy/Button';
 import Snackbar, { SnackbarOrigin } from '@mui/joy/Snackbar';
 import Alert from '@mui/joy/Alert';
+import axios from "axios";
+axios.defaults.headers.post['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
+// axios.defaults.headers.post['sessionid'] = localStorage.getItem('sessionid');
+
 type MessagesPaneProps = {
   chat: ChatProps;
 };
@@ -52,15 +56,15 @@ export default function MessagesPane(props: MessagesPaneProps) {
       }}
     >
       <Snackbar
-          open={open}
-          onClose={handleClose}
-          key='top+center'
-        >
-          I love snacks
-        </Snackbar>
+        open={open}
+        onClose={handleClose}
+        key='top+center'
+      >
+        I love snacks
+      </Snackbar>
 
       <MessagesPaneHeader sender={chat.sender} />
-        
+
       <Box
         sx={{
           display: 'flex',
@@ -101,17 +105,32 @@ export default function MessagesPane(props: MessagesPaneProps) {
           // setState({vertical: 'top', horizontal: 'right', open: true });
           // uncomment for snacktime
           console.log("Snack time")
-          const newId = chatMessages.length + 1;
-          const newIdString = newId.toString();
-          setChatMessages([
-            ...chatMessages,
-            {
-              id: newIdString,
-              sender: 'You',
-              content: textAreaValue,
-              timestamp: 'Just now',
-            },
-          ]);
+          
+          const handleDummy = async () => {
+
+            const response = await axios.post("http://127.0.0.1:8000/api/query", {
+              'query': textAreaValue
+            });
+            const answer = response.data['message'][0]
+            const newId = chatMessages.length + 1;
+            const newIdString = newId.toString();
+            setChatMessages([
+              ...chatMessages,
+              {
+                id: newIdString,
+                sender: 'You',
+                content: textAreaValue,
+                timestamp: 'Just now',
+              },
+              {
+                id: newIdString,
+                sender: users[0],
+                content: answer,
+                timestamp: 'Just now',
+              },
+            ]);
+          }
+          handleDummy()
         }}
       />
     </Sheet>

@@ -90,12 +90,12 @@ class gethistory(ApiErrorsMixin, APIView):
             print(access)
             userid= getUserIDFromAccessToken(access_token=access)
             print(userid)
-            sessionid= request.headers['sessionid']
+            sessionid= ChatSession.objects.get(userID=userid,isActive= True)
             print(sessionid)
             chats=Chats.objects.filter(senderID=userid, sessionID= sessionid)
             dict= serializers.serialize('json',list(chats))
-            return Response(dict,
-                    status=status.HTTP_200_OK,
+            return JsonResponse(list(chats.values()),
+                    safe=False,
                 )
         except Exception as e:
             print("Error occurred",type(e),":",e)
@@ -109,17 +109,15 @@ class query(ApiErrorsMixin, APIView):
             print(access)
             userid= getUserIDFromAccessToken(access_token=access)
             print(userid)
-            sessionid= request.headers['sessionid']
-            print(sessionid)
             print(request.data)
             query = (request.data['query'])
-            obj= ChatSession.objects.get(pk= sessionid)
+            obj= ChatSession.objects.get(userID= userid, isActive=True)
             file= 'media/'+str(obj.file)
             response= process_query(query,file)
             chat=Chats(msg= response[0], query= query,senderID= userid, sessionID= obj )
             chat.save()
             return Response({'message':response,
-                     'sessionid':sessionid},
+                     },
                     status=status.HTTP_201_CREATED
                 )
         except Exception as e:

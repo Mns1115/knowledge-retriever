@@ -92,7 +92,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const [file, setFile] = useState<File>();
   const [open, setOpen] = React.useState<boolean>(false);
-  const[errmsg ,setError]= useState('')
+  const [errmsg, setError] = useState('')
   const [open1, setOpen1] = React.useState(false);
   const [username, setUsername] = useState(localStorage.getItem('googleFirstName'))
   const [email, setEmail] = useState(localStorage.getItem('googleEmail'))
@@ -141,7 +141,7 @@ export default function Sidebar() {
       setOpen(false);
       setError('Your file was uploaded successfully.')
       setOpen1(true)
-      
+
     }
     else {
       console.log("Error uploading");
@@ -233,7 +233,7 @@ export default function Sidebar() {
           }}
         >
           <ListItem>
-            <ListItemButton selected>
+            <ListItemButton selected onClick={() => setOpen(true)}>
               <AddIcon></AddIcon>
               <ListItemContent>
                 <Typography level="title-sm">New Conversation</Typography>
@@ -364,38 +364,63 @@ export default function Sidebar() {
               >
                 Upload File
               </Typography>
-              <Button
-                component="label"
-                role={undefined}
-                tabIndex={-1}
-                variant="outlined"
-                color="neutral"
-                startDecorator={
-                  <SvgIcon>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
-                      />
-                    </svg>
-                  </SvgIcon>
-                }
-                onClick={() => setOpen(true)} >
-                Upload a file
-                <VisuallyHiddenInput type="file" onChange={handleFile} />
+              <Sheet
+                sx={{
+                  width: 300,
+                  mx: 'auto', // margin left & right
+                  my: 4, // margin top & bottom
+                  py: 3, // padding top & bottom
+                  px: 2, // padding left & right
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2,
+                  borderRadius: 'sm',
+                  boxShadow: 'md',
+                }}
+              >
 
-              </Button>
-              <Typography>
-                File name: {file?.name}
-              </Typography>
-              <Button onClick={handleUpload}>Upload button</Button>
+                <Button
+                  component="label"
+                  role={undefined}
+                  tabIndex={-1}
+                  variant="outlined"
+                  color="neutral"
+                  startDecorator={
+                    <SvgIcon>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
+                        />
+                      </svg>
+                    </SvgIcon>
+                  }
+                  onClick={() => setOpen(true)} >
+                  Upload a file
+                  <VisuallyHiddenInput type="file" onChange={handleFile} />
+
+                </Button>
+
+                <Typography>
+                Please note that upon uploading this file previously uploaded file will be deleted. 
+                  <Typography
+                    fontSize="sm"
+                    sx={{ alignSelf: 'center' }}
+                  >
+                   <br></br> File name: {file?.name}
+                  </Typography>
+                  
+                  
+                </Typography>
+                <Button onClick={handleUpload} variant="soft" color='success'>Upload button</Button>
+              </Sheet>
             </Sheet>
           </Modal>
 
