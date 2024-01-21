@@ -25,7 +25,7 @@ import chromadb
 import gradio as gr
 from .llama import query_llama2_EP, query_google_API
 # Hugging Face api token
-HUGGINGFACEHUB_API_TOKEN = "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"
+HUGGINGFACEHUB_API_TOKEN = "###" #API code here
 
 def initialize_embeddings():
     model_identifier = "sentence-transformers/all-mpnet-base-v2"
