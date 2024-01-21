@@ -4,7 +4,7 @@ from langchain.embeddings import GooglePalmEmbeddings
 from langchain.llms import GooglePalm
 
 def query_google_API(context, query ):
-    llm=GooglePalm(google_api_key="AIzaSyAF9UND7RFqn5NLbOJAI9zxo4mTxhB65cU")
+    llm=GooglePalm(google_api_key="#")# google api here
     llm.temperature=0.2
 
     template = [f"""
