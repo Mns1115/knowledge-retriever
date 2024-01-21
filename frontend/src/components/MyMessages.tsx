@@ -11,13 +11,15 @@ import axios from "axios";
 axios.defaults.headers.post['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
 // axios.defaults.headers.post['sessionid'] = localStorage.getItem('sessionid');
 export default function  MyProfile() {
+
+  const [selectedChat, setSelectedChat] = React.useState<ChatProps>(chats[0]);
   
   chats[0].messages=[]
   chats[0].messages[0] = {
     id: '1',
-    content: 'Hi Olivia, I am currently working on the project.',
-    timestamp: 'Wednesday 9:00am',
-    sender: 'You',
+    content: 'Hi There! Welcome to Alt Knowledge. Feel free to upload documents and ask questions.',
+    timestamp: '',
+    sender: users[0],
   }
   let sessionid= localStorage.getItem("sessionid")
   const handleDummy = async () => {
@@ -48,10 +50,9 @@ export default function  MyProfile() {
       mainid=mainid+1;
     }
   }
-  // useEffect(() => {
+  useEffect(() => {
   handleDummy()
-  // },[])
-  const [selectedChat, setSelectedChat] = React.useState<ChatProps>(chats[0]);
+  },[])
   return (
     <Sheet
       sx={{

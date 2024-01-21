@@ -15,7 +15,6 @@ import os
 import social_login.settings as settings
 from django.core import serializers
 from django.http import JsonResponse 
-
 import requests
 import os
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -64,13 +63,14 @@ endpoint = 'YOUR_ENDPOINT_URL_HERE'
 def process_query(query, file):
     retrieved_docs = db.similarity_search(query)
     # print(retrieved_docs)
+    ret_docs=list()
     for docs in retrieved_docs:
       if file in str(docs.metadata['source']):
-          retrieved_docs= docs
-          print("Only file:",docs)
+          ret_docs.append(docs)
+        #   print("Only file:",docs)
     sourceout="Answers are found from the following source files:\n"
-    combined_context = concatenate_documents(retrieved_docs)
-    # print(combined_context)
+    combined_context = concatenate_documents(ret_docs)
+    print("context_combined:",combined_context)
     answer = query_google_API(combined_context, query)
     return answer.replace("\\n", "\n"),combined_context
 
@@ -90,7 +90,12 @@ class gethistory(ApiErrorsMixin, APIView):
             print(access)
             userid= getUserIDFromAccessToken(access_token=access)
             print(userid)
-            sessionid= ChatSession.objects.get(userID=userid,isActive= True)
+            try:
+                sessionid= ChatSession.objects.get(userID=userid,isActive= True)
+            except ChatSession.DoesNotExist:
+                inst= ChatSession(userID= User.objects.get(pk=userid),isActive=True)
+                inst.save()
+                sessionid= ChatSession.objects.get(userID=userid,isActive= True)
             print(sessionid)
             chats=Chats.objects.filter(senderID=userid, sessionID= sessionid)
             dict= serializers.serialize('json',list(chats))
@@ -106,13 +111,18 @@ class query(ApiErrorsMixin, APIView):
         print("Entered query api")
         try:
             access= (request.headers['Authorization'].split(' '))[1]
-            print(access)
             userid= getUserIDFromAccessToken(access_token=access)
-            print(userid)
             print(request.data)
             query = (request.data['query'])
             obj= ChatSession.objects.get(userID= userid, isActive=True)
+            if str(obj.file)=='':
+                response= ("No file uploaded. Kindly upload a file and ask query.","nahh")
+                return Response({'message':response,
+                     },
+                    status=status.HTTP_200_OK
+                )
             file= 'media/'+str(obj.file)
+            print("Query: ",query,"\nFile:",file,"\n")
             response= process_query(query,file)
             chat=Chats(msg= response[0], query= query,senderID= userid, sessionID= obj )
             chat.save()
@@ -147,16 +157,19 @@ class newSession( ApiErrorsMixin, APIView):
                 user= User.objects.get(id=userid)
                 sessions= ChatSession.objects.filter(userID=userid)
                 for each in sessions:
-                    each.isActive=False
-                    file= str(settings.MEDIA_ROOT)+'/'+str(each.file)
-                    print(file)
-                    if os.path.exists(file):
-                        os.remove(file) # removing previous files
-                    each.save() # turning all of the sessions as false
+                    if(each.isActive==True):
+                        file= str(settings.MEDIA_ROOT)+'/'+str(each.file)
+                        print(file)
+                        if os.path.exists(file) and str(each.file)!='':
+                            os.remove(file) # removing previous files
+                        each.isActive=False
+                        each.save() # turning all of the sessions as false                    
                     
                 print(sessions)
                 serializer.save(userID= user,isActive=True)
                 sessionid= ChatSession.objects.get(userID= user, isActive=True)
+                global db
+                db = process_and_embed_docs(example_path, hf)
                 return Response(
                     {'file':serializer.data['file'],
                      'sessionid':sessionid.pk}

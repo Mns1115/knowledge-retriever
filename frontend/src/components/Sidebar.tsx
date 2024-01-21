@@ -39,6 +39,7 @@ import { useCallback, useEffect, useState } from "react";
 import ColorSchemeToggle from './ColorSchemeToggle';
 import { closeSidebar } from '../utils';
 import { Navigate, useNavigate } from 'react-router-dom';
+import CircularProgress from '@mui/joy/CircularProgress';
 
 import Snackbar from '@mui/joy/Snackbar';
 import PlaylistAddCheckCircleRoundedIcon from '@mui/icons-material/PlaylistAddCheckCircleRounded';
@@ -97,6 +98,8 @@ export default function Sidebar() {
   const [username, setUsername] = useState(localStorage.getItem('googleFirstName'))
   const [email, setEmail] = useState(localStorage.getItem('googleEmail'))
   const [profile, setProfile] = useState(localStorage.getItem('profile'))
+
+  const [buttonText, setButtonText] = useState("Upload");
   useEffect(() => {
     const storedUsername = localStorage.getItem("googleFirstName");
     const storedEmail = localStorage.getItem("googleEmail");
@@ -125,7 +128,7 @@ export default function Sidebar() {
     }
   };
   const handleUpload = async () => {
-
+    setButtonText('Uploading.....')
     const formData = new FormData();
     formData.append("file", file!);
     const headers = {
@@ -147,6 +150,7 @@ export default function Sidebar() {
       console.log("Error uploading");
       setError('Error uploading your file')
     }
+    setButtonText('Upload')
   };
   const handleLogout = () => {
     localStorage.clear(); // Clear localStorage when the button is clicked
@@ -419,7 +423,7 @@ export default function Sidebar() {
                   
                   
                 </Typography>
-                <Button onClick={handleUpload} variant="soft" color='success'>Upload button</Button>
+                <Button onClick={handleUpload} variant="soft" color='success'>{buttonText}</Button>
               </Sheet>
             </Sheet>
           </Modal>
